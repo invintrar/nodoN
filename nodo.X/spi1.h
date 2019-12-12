@@ -17,14 +17,12 @@
 /*----------------------------------------------------------------------------
  FUCTION PROTOTYPES
  -----------------------------------------------------------------------------*/
-
-void SPI1_Init(void);
-
-
 /**
- * @param Velocidad: FAST= 5Mhz or SLOW=312.5kHz 
+ * 
+ * @param speed
  */
-void SD_SPI1_Init(unsigned char);
+void SPI1_Init(uint8_t speed);
+
 
 /**
  * @param  Dato a enviar

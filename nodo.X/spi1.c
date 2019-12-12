@@ -13,16 +13,24 @@ void SPI1_Exchange(uint8_t *pTransmitData, uint8_t *pReceiveData);
  FUNCTIONS
  -----------------------------------------------------------------------------*/
 
-void SPI1_Init() {
+void SPI1_Init(uint8_t speed) {
     SPI1STATbits.SPIEN = 0;
-    /* 
-     * FCY = 40 Mhz
-     * Fosc spi = 40Mhz/(1*16) =2.5Mhz
-     * MSTEN Master; DISSDO disabled; SPRE 1:1(0b111); PPRE 16:1(0b01); MODE16 disabled; 
-     * SMP Middle; DISSCK disabled; CKP Idle:Low, Active:High; 
-     * CKE Active to Idle;
-     *  SSEN disabled.*/
-    SPI1CON1 = 0x13D;
+
+    if (speed == FAST) {
+        /* 
+         * FCY = 40 Mhz
+         * Fosc spi = 40Mhz/(4*2) =5Mhz
+         * MSTEN Master; DISSDO disabled; PPRE 4:1(0b10);SPRE 2:1(0b110)
+         * MODE16 disabled; 
+         * SMP Middle; DISSCK disabled; CKP Idle:Low, Active:High; 
+         * CKE Active to Idle;
+         *  SSEN disabled.*/
+        SPI1CON1 = 0x13A;
+    } else {
+        /*40MHz / (2*64) =0.3125Mhz = 312.5kHz*/
+        SPI1CON1 = 0x138;
+    }
+
     /* SPIFSD disabled; SPIBEN disabled; FRMPOL disabled; FRMDLY disabled;
      *  FRMEN disabled.*/
     SPI1CON2 = 0x00;

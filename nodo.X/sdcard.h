@@ -2,7 +2,7 @@
 #define SD_H
 
 #include "main.h"
-#include "spi2.h"
+#include "spi1.h"
 
 /*****************************************************************************/
 /* Structures definition*/
@@ -26,7 +26,7 @@ extern sdFlags sdF;
 #define SD_CS_Lat  LATB
 #define SD_CS_Tris TRISB
 #define SD_CS_Port PORTB
-#define SD_CS_Bit  6
+#define SD_CS_Bit  13
 // Indicator led port definitions
 #define SD_Led_Tris TRISA
 #define SD_Led_Lat  LATA

@@ -1,4 +1,5 @@
 #include "system.h"
+#include "ds3234.h"
 
 void SYSTEM_Initialize(void)
 {
@@ -8,16 +9,18 @@ void SYSTEM_Initialize(void)
     
     //SPI1_Init();
     
-    SPI2_Init(FAST);
+    SPI2_Init();
     
-    INTERRUPT_Initialize();
+    DS3234_Init();
     
-    EXT_INT_Initialize();
+    //INTERRUPT_Initialize();
+    
+    //EXT_INT_Initialize();
     
     /*Inicializamos el modulo ADC1*/
     //ADC1_Initialize();
     
-    INTERRUPT_GlobalEnable();
+    //INTERRUPT_GlobalEnable();
     
     
     /*Comprobamos que este conecto una microSD y si lo esta la inicilizamos*/

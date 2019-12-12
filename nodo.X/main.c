@@ -9,38 +9,33 @@
  HEADER FILES
  -----------------------------------------------------------------------------*/
 #include "main.h"
+#include "ds3234.h"
+#include <stdio.h>
 
 /*----------------------------------------------------------------------------
  VARIABLE GLOBALES
  -----------------------------------------------------------------------------*/
-unsigned char bufferE[512];
-unsigned char bufferR[512];
-unsigned char banderInt1;
-unsigned char banderaSPI1;
-unsigned int banderCont;
-unsigned long sector;
+uint8_t bufferE[512];
+uint8_t bufferR[512];
+uint8_t banderInt1;
+uint8_t banderaSPI1;
+uint16_t banderCont;
+ds3234_data_time rtc;
+ds3234_time rtcTime;
+uint32_t sector;
 
 /*
  * VARIABLES EXTERN
  */
-extern int vADC;
-extern unsigned char bNrf;
-int i;
+extern uint16_t vADC;
+extern uint8_t bNrf;
+uint16_t i;
 
-unsigned char mutex;
+uint8_t mutex;
 
-typedef struct _data_to_send {
-    uint32_t resp;
-} data_to_sent;
-
-data_to_sent to_send;
-
-typedef struct _data_to_received {
-    uint32_t recv0;
-    uint32_t recv1;
-} data_received;
-data_received received;
-
+uint8_t seconds;
+uint8_t minutes;
+uint8_t hours;
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPES
  -----------------------------------------------------------------------------*/
@@ -49,7 +44,7 @@ data_received received;
  FUNCTION MAIN
  =============================================================================*/
 int main(void) {
-    unsigned char vSpi2;
+
     /* Direction RX*/
     //unsigned char rx_addr[5] = {0x78, 0x78, 0x78, 0x78, 0x78};
     //unsigned char tx_addr[5] = {0x78, 0x78, 0x78, 0x78, 0x78};
@@ -68,7 +63,7 @@ int main(void) {
      */
 
     SYSTEM_Initialize();
-    __delay_ms(10);
+    __delay_ms(250);
 
 
     /* Incializamos la variable de la memoria a 0*/
@@ -82,35 +77,31 @@ int main(void) {
     /*Encendemos el ADXL255*/
     //ADXL355_Write_Byte(POWER_CTL, MEASURING);
     //__delay_ms(250);
+
+    //00-60 seconds
+    rtc.seconds = 0;
+    //00-60 minute
+    rtc.minutes = 12;
+    //00-24 hour
+    rtc.hours = 17;
+    //Sunday = 1, Monday = 2, ...
+    rtc.day = 5;
+    rtc.date = 12;
+    rtc.month = 12;
+    rtc.year = 19;
+
+    DS3234_setTime(rtc);
     
-    LATAbits.LATA1 = 1;
-    __delay_ms(250);
+    LATAbits.LATA1 = 0;
 
-
+    // Bucle Infinito
     while (1) {
-        //mutex = 0;
-        
-        vSpi2 = 0x00;
+        __delay_ms(1000);
         
         // Start measuring
         //ADC1_SamplingStart();
         //ADC1_SamplingStop();
-        
-        LATBbits.LATB6 = 0;
-        SPI2_Exchange_Byte(0x0F);
-        vSpi2 = SPI2_Exchange_Byte(0x00);
-        LATBbits.LATB6 = 1;
-        
-        if (vSpi2 == 0xC8){
-            LATAbits.LATA1 ^= 1;
-            __delay_ms(250);
-        }
-        
-        LATAbits.LATA1 = 0;
-        __delay_ms(250);
-        __delay_ms(750);
-        
-        
+        DS3234_Time(&rtcTime);
         
         /*
         while(continuar < 511){
