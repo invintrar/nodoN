@@ -11,6 +11,7 @@
 #include "spi1.h"
 #include "spi2.h"
 #include "adc1.h"
+#include "ds3234.h"
 
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPE

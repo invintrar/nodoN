@@ -1,6 +1,6 @@
 #include "rf24l01.h"
 
-void RF24L01_init(void) {
+void RF24L01_Init(void) {
     //Chip Select
     RF24L01_CS_SetDigitalOutput();
     RF24L01_CS_SetHigh();

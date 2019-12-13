@@ -26,7 +26,7 @@ extern sdFlags sdF;
 #define SD_CS_Lat  LATB
 #define SD_CS_Tris TRISB
 #define SD_CS_Port PORTB
-#define SD_CS_Bit  13
+#define SD_CS_Bit  0
 // Indicator led port definitions
 #define SD_Led_Tris TRISA
 #define SD_Led_Lat  LATA

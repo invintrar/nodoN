@@ -195,7 +195,7 @@ typedef struct _RF24L01_reg_FEATURE_content {
 
 /*Function Prototype*/
 
-void RF24L01_init(void);
+void RF24L01_Init(void);
 
 void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel);
 

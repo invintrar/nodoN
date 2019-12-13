@@ -18,8 +18,6 @@ unsigned char SD_Init(void) {
 
     // Initialize SPI interface at slow speed
     SPI1_Init(SLOW);
-    
-    
 
     // Toggle CLK for 80 cycles with SDO high
     for (i = 0; i < 80; i++)
@@ -131,7 +129,7 @@ unsigned char SD_Init(void) {
 
     // Configure SPI to maximum speed
     Release_SD();
-    
+
     SPI1_Init(FAST);
 
     return SUCCESSFUL_INIT;
@@ -171,7 +169,7 @@ unsigned char SD_Read(unsigned char *Buffer, unsigned int nbytes) {
 
 unsigned char SD_Read_Block(unsigned char *Buffer, unsigned long Address) {
     unsigned char temp;
-    
+
     Select_SD();
 
     if (ccs == 0x02) Address <<= 9; // Address * 512 for SDSC cards
@@ -182,7 +180,7 @@ unsigned char SD_Read_Block(unsigned char *Buffer, unsigned long Address) {
     temp = SD_Read(Buffer, 512);
 
     Release_SD();
-    
+
     return temp;
 }
 
@@ -210,9 +208,9 @@ unsigned char SD_Write_Block(unsigned char *Buffer, unsigned long Address) {
     temp = (temp & 0x0E) >> 1;
     if (SD_Ready() == 0)
         return SD_NOT_READY;
-    
+
     Release_SD();
-    
+
     if (temp == 0x02)
         return DATA_ACCEPTED;
     else if (temp == 0x05)

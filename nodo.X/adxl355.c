@@ -13,8 +13,10 @@ char dataCBuffer[];
  -----------------------------------------------------------------------------*/
 
 void ADXL355_Init() {
-    ADXL355_Write_Byte(Reset, 0x52); //Resetea el dispositivo
+    //Reset the device
+    ADXL355_Write_Byte(Reset, 0x52); 
     __delay_ms(10);
+    
     ADXL355_Write_Byte(POWER_CTL, TEMP_OFF | STANDBY);
     ADXL355_Write_Byte(Range, _2G | INT_ACTIVE_HIGH);
 
