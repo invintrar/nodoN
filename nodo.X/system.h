@@ -12,6 +12,7 @@
 #include "spi2.h"
 #include "adc1.h"
 #include "ds3234.h"
+#include "tmr1.h"
 
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPE

@@ -7,7 +7,7 @@ void SYSTEM_Initialize(void)
     
     pines_Conf_Init();
     
-    SPI1_Init(FAST);
+    //SPI1_Init(FAST);
     
     //SPI2_Init();
     
@@ -15,15 +15,17 @@ void SYSTEM_Initialize(void)
     
     EXT_INT_Initialize();
     
+    TMR1_Initialize();
+    
+    INTERRUPT_GlobalEnable(); 
+    
     //Initialize module ADC1
     //ADC1_Initialize();
-    
-    //INTERRUPT_GlobalEnable(); 
     
     //DS3234_Init();
     
      // Initialize accelerometer
-    ADXL355_Init();
+    //ADXL355_Init();
     
     //Initialize module nRF24L01
     //RF24L01_Init();

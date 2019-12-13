@@ -16,8 +16,7 @@
  -----------------------------------------------------------------------------*/
 uint8_t bufferE[512];
 uint8_t bufferR[512];
-uint8_t banderInt1;
-uint8_t banderaSPI1;
+uint8_t banderInt1, j;
 uint16_t banderCont;
 ds3234_data_time rtc;
 ds3234_time rtcTime;
@@ -68,16 +67,7 @@ int main(void) {
     while (1) {
         //__delay_ms(1000);
 
-
         //DS3234_Time(&rtcTime);
-
-        /*
-        while(continuar < 511){
-            bufferE[continuar] = (ADCValue & 0x00FF);
-            bufferE[continuar+1] = (ADCValue >> 8);
-            continuar += 2;
-        }
-         */
 
         /*
         //It Check that the uSD stay connected
@@ -100,7 +90,8 @@ int main(void) {
          */
 
 
-        /*Set Mode RX*/
+        /*
+        //Set Mode RX
         RF24L01_set_mode_RX();
 
         //Wait interrupt
@@ -118,12 +109,15 @@ int main(void) {
         }
         unsigned short delay = 0xFFF;
         while (delay--);
+         */
 
         /*
          * PREPARE THE RESPONSE
          */
 
-        //Prepare the buffer to send from the data_to_send struct
+
+        /*
+        //Prepare the buffer to send from the data_to_send structure
         unsigned char buffer_to_send[32];
         for (i = 0; i < 32; i++) {
             buffer_to_send[i] = 0xAA;
@@ -134,19 +128,18 @@ int main(void) {
 
         mutex = 0;
 
-        /*Set Mode TX*/
+        //Set Mode TX
         RF24L01_set_mode_TX();
 
         //Write Payload
         RF24L01_write_payload(buffer_to_send, sizeof (buffer_to_send));
 
+
+
         while (!mutex);
         if (mutex != 1) {
             //The transmission failed
-        } else {
-        }
-        
-        if (banderInt1 == 0) {
+        } else if (banderInt1 == 0) {
             for (j = 0; j < 63; j++) {
                 bufferE[i] = dataCBuffer[j];
                 if (i < 512) {
@@ -161,6 +154,7 @@ int main(void) {
             }
             banderInt1 = 1;
         }
+         */
 
     }
 
