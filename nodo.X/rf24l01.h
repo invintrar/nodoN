@@ -4,7 +4,7 @@
 //#include <stdint.h> //Required for the stdint typedefs
 #include <p33EP256MC202.h>
 #include "spi1.h"
-#include "main.h"
+
 
 /* Definimos Chip Select para el RF24L01*/
 #define RF24L01_CS_SetDigitalOutput()  _TRISB13 = 0

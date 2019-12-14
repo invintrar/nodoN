@@ -1,11 +1,9 @@
 #include "sdcard.h"
-
-unsigned char ccs;
-sdFlags sdF;
 /*****************************************************************************/
 /* SD Card Functions */
 
 /*****************************************************************************/
+uint8_t ccs;
 
 unsigned char SD_Init(void) {
     // Local variables required
@@ -13,7 +11,7 @@ unsigned char SD_Init(void) {
     unsigned char temp = 0;
     unsigned long temp_long;
 
-    // Start with CS = 1
+    // Set Chip Select Digital Input
     Release_SD();
 
     // Initialize SPI interface at slow speed
@@ -23,7 +21,7 @@ unsigned char SD_Init(void) {
     for (i = 0; i < 80; i++)
         SPI1_Exchange_Byte(0xFF);
 
-    // Reset SD Card
+    // Set Chip Select Digital Output and Set Low
     Select_SD();
 
     for (i = 0; i < SD_TIME_OUT; i++) {
@@ -271,18 +269,6 @@ unsigned char SD_Ready(void) {
             return 0x00;
     }
     return temp;
-}
-// Check if SD card is inserted
-
-void SD_Check(void) {
-    if (SD_Detect() != DETECTED) {
-        sdF.detected = 0;
-        sdF.init_ok = 0;
-        sdF.saving = 0;
-        SD_Led_Off();
-    } else {
-        sdF.detected = 1;
-    }
 }
 
 unsigned char SD_Detect(void) {

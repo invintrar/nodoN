@@ -16,21 +16,17 @@
  -----------------------------------------------------------------------------*/
 uint8_t bufferE[512];
 uint8_t bufferR[512];
-uint8_t banderInt1, j;
-uint16_t banderCont;
+uint8_t rx_addr[5], tx_addr[5];
+uint8_t nrfDataRx[8], nrfDataTx[8];
+uint8_t uSDState, bWriteuSD;
+uint8_t fInt1;
+uint8_t bNrf, mutex, bInicioBloque, bAdc;
 ds3234_data_time rtc;
 ds3234_time rtcTime;
 uint32_t sector;
-
-/*
- * VARIABLES EXTERN
- */
-extern uint16_t vADC;
-extern uint8_t bNrf;
+uint16_t vADC;
 uint16_t i;
-
-uint8_t mutex;
-
+uint8_t j;
 uint8_t seconds;
 uint8_t minutes;
 uint8_t hours;
@@ -49,10 +45,10 @@ int main(void) {
     SYSTEM_Initialize();
     __delay_ms(250);
 
-    //Configuramos  RF24L01
-    //RF24L01_setup(tx_addr, rx_addr, 12);
+    //Setup  RF24L01
+    RF24L01_setup(tx_addr, rx_addr, 12);
 
-    /*Encendemos el ADXL255*/
+    //Turn on ADXL255
     //ADXL355_Write_Byte(POWER_CTL, MEASURING);
     //__delay_ms(250);
 
@@ -65,123 +61,128 @@ int main(void) {
 
     // Loop Infinite
     while (1) {
-        //__delay_ms(1000);
-
-        //DS3234_Time(&rtcTime);
 
         /*
-        //It Check that the uSD stay connected
-        SD_Check();
-
-        if (sdF.detected) {
-            // It Check that It was initialized
-            if (!sdF.init_ok) {
-                //Initialize uSD
-                if (SD_Init() == SUCCESSFUL_INIT) {
-                    sdF.init_ok = 1;
-                    SD_Led_On();
+        if (fInt1 == 1) {
+            if (bInicioBloque == 0) {
+                //0.8us
+                //DS3234_Time(&rtcTime);
+                bufferE[0] = 0x48;
+                bufferE[1] = rtcTime.hours;
+                bufferE[2] = rtcTime.minutes;
+                bufferE[3] = rtcTime.seconds;
+                bufferE[4] = vADC;
+                bufferE[5] = vADC >> 8;
+                bufferE[6] = 0x48;
+                bInicioBloque = 1;
+                i = 7;
+            }
+            for (j = 0; j < 63; j++) {
+                bufferE[i] = dataCBuffer[j];
+                i++;
+                if (i == 511) {
+                    bufferE[i] = 0x48;
+                    bWriteuSD = 1;
+                    bInicioBloque = 0;
                 }
             }
+        }
+        //110 us for write uSD
+        if (uSDState == SUCCESSFUL_INIT && bWriteuSD == 1) {
             SD_Write_Block(bufferE, sector);
+            bWriteuSD = 0;
             sector++;
         } else {
-            SD_Led_Off();
+            uSDState = SD_Init();
         }
          */
 
 
-        /*
         //Set Mode RX
         RF24L01_set_mode_RX();
 
-        //Wait interrupt
+        //Wait Interruption
         while (!mutex);
+
         if (mutex == 1) {
-            unsigned char recv_data[32];
-            RF24L01_read_payload(recv_data, sizeof (recv_data));
-            received = *((data_received *) & recv_data);
-
-            asm("nop"); //Place a breakpoint here to see memmory
-
-        } else {
-            //Something happened
-            to_send.resp = 0;
+            RF24L01_read_payload(nrfDataRx, sizeof (nrfDataRx));
         }
+
         unsigned short delay = 0xFFF;
         while (delay--);
-         */
+
+        // Start measuring
+        ADC1_SamplingStart();
+        ADC1_SamplingStop();
+
+
+        rtc.seconds = nrfDataRx[0];
+        rtc.minutes = nrfDataRx[1];
+        rtc.hours = nrfDataRx[2];
+        rtc.day = nrfDataRx[3];
+        rtc.month = nrfDataRx[4];
+        rtc.date = nrfDataRx[5];
+        rtc.year = nrfDataRx[6];
+
+        DS3234_setTime(rtc);
 
         /*
          * PREPARE THE RESPONSE
          */
 
+        // Read RTC time
+        DS3234_Time(&rtcTime);
 
-        /*
-        //Prepare the buffer to send from the data_to_send structure
-        unsigned char buffer_to_send[32];
-        for (i = 0; i < 32; i++) {
-            buffer_to_send[i] = 0xAA;
+        nrfDataTx[0] = 0x48;
+        nrfDataTx[1] = rtcTime.seconds;
+        nrfDataTx[2] = rtcTime.minutes;
+        nrfDataTx[3] = rtcTime.hours;
+        // Test data available
+        while (!bAdc) {
+            nrfDataTx[4] = vADC >> 8;
+            nrfDataTx[5] = vADC;
+            bAdc = 0;
         }
+        nrfDataTx[6] = 0x48;
+        nrfDataTx[7] = 0x48;
 
-
-        *((data_to_sent *) & buffer_to_send) = to_send;
-
+        
         mutex = 0;
 
         //Set Mode TX
         RF24L01_set_mode_TX();
 
         //Write Payload
-        RF24L01_write_payload(buffer_to_send, sizeof (buffer_to_send));
+        RF24L01_write_payload(nrfDataTx, sizeof (nrfDataTx));
 
-
-
-        while (!mutex);
-        if (mutex != 1) {
-            //The transmission failed
-        } else if (banderInt1 == 0) {
-            for (j = 0; j < 63; j++) {
-                bufferE[i] = dataCBuffer[j];
-                if (i < 512) {
-                    i++;
-                } else {
-                    if (sector > 975871)
-                        break;
-                    SD_Write_Block(bufferE, sector);
-                    i = 0;
-                    sector++;
-                }
-            }
-            banderInt1 = 1;
-        }
-         */
+        delay = 0xFFF;
+        while (delay--);
 
     }
-
     return 0;
 }
 
 void initVariables() {
-    /* Direction RX*/
-    //unsigned char rx_addr[5] = {0x78, 0x78, 0x78, 0x78, 0x78};
-    //unsigned char tx_addr[5] = {0x78, 0x78, 0x78, 0x78, 0x78};
-
-    //banderInt1 = 1;
-    //banderCont = 0;
-    //banderaSPI1 = 0;
-
-    //uSD Flags
-    sdF.detected = 0;
-    sdF.init_ok = 0;
-    sdF.saving = 0;
-
-    //int i;
-    //int continuar = 0;
-    //sector = 2051;
-    //sector = 34816;
+    fInt1 = 0;
+    mutex = 0;
+    bInicioBloque = 0;
+    //Sector write uSD
     sector = 35000;
-    mutex = 1;
+    bWriteuSD = 0;
+    bAdc = 0;
 
+    // Address NrF24L01 RX and TX
+    for (i = 0; i < 5; i++) {
+        //RX Address 
+        rx_addr[i] = 0x78;
+        //TX Address
+        tx_addr[i] = 0x78;
+    }
+
+    for (i = 0; i < 8; i++) {
+        nrfDataRx[i] = 0x00;
+        nrfDataTx[i] = 0x00;
+    }
 
     /* Initialization the variable of uSD to 0xAA*/
     for (i = 0; i < 512; i++) {

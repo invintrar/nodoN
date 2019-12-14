@@ -209,6 +209,9 @@ extern "C" {
         </code>
 
      */
+    
+    extern uint16_t vADC;
+    extern uint8_t bAdc;
 
     void ADC1_Initialize(void);
 

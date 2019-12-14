@@ -141,7 +141,7 @@ void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel) {
     /*RX payload in data pipe0(0x11)*/
     RF24L01_reg_RX_PW_P0_content RX_PW_P0;
     *((uint8_t *) & RX_PW_P0) = 0;
-    RX_PW_P0.RX_PW_P0 = 0x20; //Number of bytes in RX payload in data pipe 0(32 bytes)
+    RX_PW_P0.RX_PW_P0 = 0x08; //Number of bytes in RX payload in data pipe 0(8 bytes)
     RF24L01_write_register(RF24L01_reg_RX_PW_P0, ((uint8_t *) & RX_PW_P0), 1);
     
 }

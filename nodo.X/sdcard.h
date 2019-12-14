@@ -7,18 +7,11 @@
 /*****************************************************************************/
 /* Structures definition*/
 
-/*****************************************************************************/
-typedef struct{
-    unsigned init_ok : 1;
-    unsigned detected : 1;
-    unsigned saving : 1;
-}sdFlags;
-
 /*----------------------------------------------------------------------------
- Variables Externas
+ Variables Extern
  -----------------------------------------------------------------------------*/
-extern unsigned char ccs;
-extern sdFlags sdF;
+extern uint8_t ccs;
+extern uint8_t uSDState;
 
 /*---------------------------------------------------------------------------
  SD Card Chip Select I/O definition

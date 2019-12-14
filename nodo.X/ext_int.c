@@ -2,8 +2,6 @@
    Section: Includes
  */
 #include "ext_int.h"
-
-unsigned char bNrf = 0;
 /**
    Section: External Interrupt Handlers
  */
@@ -25,12 +23,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 }
 
 void __attribute__((weak)) EX_INT1_CallBack(void) {
-    // Add your custom callback code here
-    Led_verde_toggle();
-    //banderInt1 = 0;
-    //banderCont = 0;
-    //ADXL355_Read_FIFO_Full();
-
+    fInt1 = 1;
+    ADXL355_Read_FIFO_Full();
 }
 
 /**
@@ -47,8 +41,6 @@ void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt(void) {
 
 void __attribute__((weak)) EX_INT2_CallBack(void) {
     uint8_t sent_info = 0;
-
-    Led_verde_toggle();
 
     /*Check data was sent*/
     if ((sent_info = RF24L01_was_data_sent())) {

@@ -5,7 +5,8 @@
     Section: Includes
 */
 #include "adxl355.h"
-#include "main.h"
+
+
 
 // Provide C++ Compatibility
 #ifdef __cplusplus  
@@ -71,6 +72,11 @@ void EX_INT2_CallBack(void);
     INT2 - EX_INT2
 
 */
+
+extern uint8_t bNrf;
+extern uint8_t mutex;
+extern uint8_t fInt1;
+
 void EXT_INT_Initialize(void);
 // Provide C++ Compatibility
 #ifdef __cplusplus  

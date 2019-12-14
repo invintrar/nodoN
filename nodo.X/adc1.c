@@ -4,8 +4,6 @@
 
 #include "adc1.h"
 
-int vADC;
-
 /**
   Section: Data Type Definitions
  */
@@ -77,7 +75,7 @@ void ADC1_Initialize(void) {
 }
 
 void __attribute__((weak)) ADC1_CallBack(void) {
-    // Add your custom callback code here
+    bAdc = 1;
     vADC = ADC1BUF0;
 }
 
@@ -90,8 +88,6 @@ void __attribute__((__interrupt__, auto_psv)) _AD1Interrupt(void) {
 }
 
 
-
 /**
   End of File
  */
-

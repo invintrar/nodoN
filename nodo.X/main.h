@@ -19,12 +19,6 @@
 /*------------------------------------------------------------------------------
  VARIABLE DECLARATIONS
  -----------------------------------------------------------------------------*/
-extern unsigned char banderInt1;
-extern unsigned char banderaSPI1;
-extern unsigned int banderCont;
-extern unsigned long sector;
-
-extern uint8_t mutex;
 
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPES
