@@ -115,7 +115,7 @@ uint16_t TMR1_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
-    LATAbits.LATA1 ^= 1;
+    //LATAbits.LATA1 ^= 1;
 }
 
 void  TMR1_SetInterruptHandler(void (* InterruptHandler)(void))

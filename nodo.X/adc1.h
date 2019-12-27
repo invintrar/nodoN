@@ -210,7 +210,7 @@ extern "C" {
 
      */
     
-    extern uint16_t vADC;
+    extern uint16_t vAdc;
     extern uint8_t bAdc;
 
     void ADC1_Initialize(void);

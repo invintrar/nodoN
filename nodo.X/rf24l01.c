@@ -1,5 +1,6 @@
 #include "rf24l01.h"
 
+/* Init Pines */
 void RF24L01_Init(void) {
     //Chip Select
     RF24L01_CS_SetDigitalOutput();
@@ -12,23 +13,21 @@ void RF24L01_Init(void) {
 
 /**
  * Function Send Command
- * @param command
+ * @param uint8_t command
  */
 void RF24L01_send_command(uint8_t command) {
-    //Chip select
+    //Chip selec set Low
     RF24L01_CS_SetLow();
-
     //Send command
     SPI1_Exchange_Byte(command);
-
-    //Chip select
+    //Chip select set High
     RF24L01_CS_SetHigh();
 }
 
 /**
  * Function Read Register
- * @param Register Address
- * @return Data of Register
+ * @param uint8_t Register Address
+ * @return uint8_t Data of Register
  */
 uint8_t RF24L01_read_register(uint8_t register_addr) {
     uint8_t result;
@@ -58,15 +57,12 @@ void RF24L01_write_register(uint8_t register_addr, uint8_t *value, uint8_t lengt
 
     //Chip select -> Low
     RF24L01_CS_SetLow();
-
     //Send address and write command
     SPI1_Exchange_Byte(RF24L01_command_W_REGISTER | register_addr);
-
     //Send data  
     for (i = 0; i < length; i++) {
         SPI1_Exchange_Byte(value[i]);
     }
-
     //Chip select -> High
     RF24L01_CS_SetHigh();
 }
@@ -81,134 +77,157 @@ void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel) {
     //CE -> Low
     RF24L01_CE_SetLow();
 
-    /* Configuration Register (0x00)*/
-    RF24L01_reg_CONFIG_content config;
-    *((uint8_t *) & config) = 0;
-    config.PRIM_RX = 1; //PRX
-    config.PWR_UP = 0; //Power down 
-    config.CRCO = 0; //CRC(Cyclic Redundancy Check) encoding scheme '0'-1 byte or '1'-2 bytes
-    config.EN_CRC = 1; //Enable CRC
-    config.MASK_MAX_RT = 0; //MAX_RT   active low interrupt on the IRQ
-    config.MASK_TX_DS = 0; //TX_DS    active low interrupt on the IRQ
-    config.MASK_RX_DR = 0; //RX_DR    active low interrupt on the IRQ
-    RF24L01_write_register(RF24L01_reg_CONFIG, ((uint8_t *) & config), 1);
-
-    /*Enable Auto Acknowledgment (0x01)*/
+    //Enable Auto Acknowledgment (0x01)
     RF24L01_reg_EN_AA_content EN_AA;
     *((uint8_t *) & EN_AA) = 0;
-    EN_AA.ENAA_P0 = 1; //Enable auto acknowledgement data pipe 0
+    // Enable Auto Ack Pipe0
+    EN_AA.ENAA_P0 = 1;
     RF24L01_write_register(RF24L01_reg_EN_AA, ((uint8_t *) & EN_AA), 1);
 
-    /* Enable RX Address(0x02) */
+    // Enable RX Address(0x02) 
     RF24L01_reg_EN_RXADDR_content RX_ADDR;
     *((uint8_t *) & RX_ADDR) = 0;
-    RX_ADDR.ERX_P0 = 1; //Enable data pipe 0
+    //Enable data pipe0
+    RX_ADDR.ERX_P0 = 1;
     RF24L01_write_register(RF24L01_reg_EN_RXADDR, ((uint8_t *) & RX_ADDR), 1);
 
-    /*Setup of Address Widths(0x03)*/
+    // Setup of Address Widths(0x03)
     RF24L01_reg_SETUP_AW_content SETUP_AW;
     *((uint8_t *) & SETUP_AW) = 0;
-    SETUP_AW.AW = 0x03; //RX/TX Address field width('11' -> 5 bytes)
+    //RX/TX Address field width ('11' -> 5 bytes)
+    SETUP_AW.AW = 0x03;
     RF24L01_write_register(RF24L01_reg_SETUP_AW, ((uint8_t *) & SETUP_AW), 1);
 
-    /*Setup of Automatic Retransmission(0x04)*/
+    // Setup of Automatic Retransmission(0x04)
     RF24L01_reg_SETUP_RETR_content SETUP_RETR;
     *((uint8_t *) & SETUP_RETR) = 0;
-    SETUP_RETR.ARC = 0X03; //Up to 3 Re-Transmit on fail of AA
-    SETUP_RETR.ARD = 0X01; //Auto Retransmit Delay(wait 500uS) 
+    //Up to 10 Re-Transmit on fail of AA
+    SETUP_RETR.ARC = 0X0A;
+    //Auto Retransmit Delay(wait 500uS) 
+    SETUP_RETR.ARD = 0X01;
     RF24L01_write_register(RF24L01_reg_SETUP_RETR, ((uint8_t *) & SETUP_RETR), 1);
 
-    /*RF Channel(0x05)*/
+    // RF Channel(0x05)
     RF24L01_reg_RF_CH_content RF_CH;
     *((uint8_t *) & RF_CH) = 0;
-    RF_CH.RF_CH = channel; //Sets the frequency channel nRF24L01 operates on
+    //Sets the frequency channel nRF24L01 operates on
+    RF_CH.RF_CH = channel;
     RF24L01_write_register(RF24L01_reg_RF_CH, ((uint8_t *) & RF_CH), 1);
 
-    /*RF Setup Register(0x06)*/
+    //RF Setup Register(0x06)
     RF24L01_reg_RF_SETUP_content RF_SETUP;
     *((uint8_t *) & RF_SETUP) = 0;
-    RF_SETUP.LNA_HCURR = 0x01; //LNA gain
-    RF_SETUP.RF_PWR = 0x03; //Set RF output power in TX mode(0dBm)
-    RF_SETUP.RF_DR = 0x01; //Air Data Rate 2Mbps   
+    //Set RF output power in TX mode(0dBm)
+    RF_SETUP.RF_PWR = 0x03;
+    //Speed date rate 2Mbps
+    RF_SETUP.RF_DR_HIGH = 1;
     RF24L01_write_register(RF24L01_reg_RF_SETUP, ((uint8_t *) & RF_SETUP), 1);
 
-    /*Write the direction RX in pipe0(0x0A)*/
+    //Write the direction RX in pipe0(0x0A)
     RF24L01_write_register(RF24L01_reg_RX_ADDR_P0, rx_addr, 5);
 
-    /*Write the direction TX(0x10)*/
+    //Write the direction TX(0x10)
     RF24L01_write_register(RF24L01_reg_TX_ADDR, tx_addr, 5);
 
-    /*RX payload in data pipe0(0x11)*/
+    //RX payload in data pipe0(0x11)
     RF24L01_reg_RX_PW_P0_content RX_PW_P0;
     *((uint8_t *) & RX_PW_P0) = 0;
-    RX_PW_P0.RX_PW_P0 = 0x08; //Number of bytes in RX payload in data pipe 0(8 bytes)
+    //Number of bytes in RX payload in data Pipe0 (8 bytes)
+    RX_PW_P0.RX_PW_P0 = 0x08;
     RF24L01_write_register(RF24L01_reg_RX_PW_P0, ((uint8_t *) & RX_PW_P0), 1);
-    
-}
 
-/**
- * Function Set Mode TX
- */
-void RF24L01_set_mode_TX(void) {
-    RF24L01_send_command(RF24L01_command_FLUSH_TX);
-
-    //CE -> Low
-    RF24L01_CE_SetLow();
-
+    // Configuration Register (0x00)
     RF24L01_reg_CONFIG_content config;
     *((uint8_t *) & config) = 0;
-    config.PRIM_RX = 0;//PTX
-    config.PWR_UP = 1;//Power Up
-    config.CRCO = 0;//CRC Encoding 1 byte
-    config.EN_CRC = 1;//Enable CRC
-    config.MASK_MAX_RT = 0;//Active low interrupt
-    config.MASK_TX_DS = 0;//Active low interrupt
-    config.MASK_RX_DR = 0;//Active low interrupt
+    //Power Up
+    config.PWR_UP = 1;
+    //PRX
+    config.PRIM_RX = 1;
+    //CRC(Cyclic Redundancy Check) encoding scheme '0'-1 byte or '1'-2 bytes
+    config.CRCO = 1;
+    //Enable CRC
+    config.EN_CRC = 1;
     RF24L01_write_register(RF24L01_reg_CONFIG, ((uint8_t *) & config), 1);
 
-    /*Clear the status register to discarf any data in the buffers*/
-    RF24L01_reg_STATUS_content status;
-    *((uint8_t *)&status) = 0;
-    status.RX_DR = 1;
-    status.MAX_RT = 1;
-    status.TX_DS = 1;
-    RF24L01_write_register(RF24L01_reg_STATUS,(uint8_t *)&status,1);
+    //Delay 2 mS
+    __delay_ms(2);
+    RF24L01_CE_SetHigh();
+    //Delay 150 uS
+    __delay_us(150);
+
+}// End Setup
+
+/**
+ * Function Send Data
+ */
+void RF24L01_sendData(uint8_t *data, uint8_t size) {
+    uint8_t i;
+    //CE -> Low
+    RF24L01_CE_SetLow();
     
-    
+    //Chip select -> Low 
+    RF24L01_CS_SetLow();
+    //Send address and command
+    SPI1_Exchange_Byte(RF24L01_command_W_TX_PAYLOAD);
+    //Send data
+    for (i = 0; i < size; i++) {
+        SPI1_Exchange_Byte(data[i]);
+    }
+    //Chip select -> High
+    RF24L01_CS_SetHigh();
+
+    //Active mode TX
+    RF24L01_reg_CONFIG_content config;
+    *((uint8_t *) & config) = 0;
+    // RX/TX Control (1:PRX, 0:PTX)
+    config.PRIM_RX = 0;
+    //Power Up
+    config.PWR_UP = 1;
+    //CRC Encoding 2 byte
+    config.CRCO = 1;
+    //Enable CRC
+    config.EN_CRC = 1;
+    RF24L01_write_register(RF24L01_reg_CONFIG, ((uint8_t *) & config), 1);
+
+    //Generates an impulsion for CE to send the data
+    RF24L01_CE_SetHigh(); //CE -> High
+    //Delay 10uS
+    __delay_us(10);
+    RF24L01_CE_SetLow(); //CE -> Low
+
 }
 
 /**
  * Function Set Mode RX
  */
 void RF24L01_set_mode_RX(void) {
-    RF24L01_reg_CONFIG_content config;
-    *((uint8_t *) & config) = 0;
-    config.PRIM_RX = 1;//PRX
-    config.PWR_UP = 1;//Power Up
-    config.CRCO = 0;//CRC Encondig 1 byte
-    config.EN_CRC = 1;//Enable CRC
-    config.MASK_MAX_RT = 0;//Active low interrupt
-    config.MASK_TX_DS = 0;//Active low interrupt
-    config.MASK_RX_DR = 0;//Active low interrupt
-    RF24L01_write_register(RF24L01_reg_CONFIG, ((uint8_t *) & config), 1);
-
-    //Clear the status register to discard any data in the buffers
-    RF24L01_reg_STATUS_content a;
-    *((uint8_t *) & a) = 0;
-    a.RX_DR = 1;
-    a.MAX_RT = 1;
-    a.TX_DS = 1;
-    RF24L01_write_register(RF24L01_reg_STATUS, (uint8_t *) & a, 1);
-
+    //uint16_t retardo;
+    RF24L01_CE_SetLow();
+    
     RF24L01_send_command(RF24L01_command_FLUSH_RX);
     
+    RF24L01_clear_interrupts();
+
+    RF24L01_reg_CONFIG_content config;
+    *((uint8_t *) & config) = 0;
+    // RX/TX Control (1:PRX, 0:PTX)
+    config.PRIM_RX = 1;
+    // 1:POWER UP, 0:POWER DOWN
+    config.PWR_UP = 1;
+    // Encoding (0:1byte, 1:2bytes)
+    config.CRCO = 1;
+    // Enable CRC
+    config.EN_CRC = 1;
+    RF24L01_write_register(RF24L01_reg_CONFIG, ((uint8_t *) & config), 1);
+
     //CE -> High
     RF24L01_CE_SetHigh();
+
 }
 
 /**
  * Function Get Status
- * @return Status
+ * @return  Structure Status
  */
 RF24L01_reg_STATUS_content RF24L01_get_status(void) {
     uint8_t status;
@@ -227,106 +246,70 @@ RF24L01_reg_STATUS_content RF24L01_get_status(void) {
 }
 
 /**
- * Function Write Payload
- * @param Data
- * @param Length
- */
-void RF24L01_write_payload(uint8_t *data, uint8_t length) {
-    RF24L01_reg_STATUS_content a;
-    uint8_t i;
-
-    a = RF24L01_get_status();
-    
-    if (a.MAX_RT == 1) {
-        //If MAX_RT, clears it so we can send data
-        *((uint8_t *) & a) = 0;
-        a.TX_DS = 1;
-        RF24L01_write_register(RF24L01_reg_STATUS, (uint8_t *) & a, 1);
-    }
-
-    //Chip select -> Low 
-    RF24L01_CS_SetLow();
-
-    //Send address and command
-    SPI1_Exchange_Byte(RF24L01_command_W_TX_PAYLOAD);
-
-    //Send data
-    for (i = 0; i < length; i++) {
-        SPI1_Exchange_Byte(data[i]);
-    }
-
-    //Chip select -> High
-    RF24L01_CS_SetHigh();
-
-    //Generates an impulsion for CE to send the data
-    RF24L01_CE_SetHigh(); //CE -> High
-    uint16_t delay = 0xFF;
-    while (delay--);
-    RF24L01_CE_SetLow(); //CE -> Low
-    
-    RF24L01_CE_SetHigh();//CE -> High
-}
-
-/**
  * Function Read Payload
  * @param Data
  * @param Length
  */
-void RF24L01_read_payload(uint8_t *data, uint8_t length) {
-    uint8_t i, status;
+void RF24L01_read_payload(uint8_t *data, uint8_t size) {
+    uint8_t i;
+
     //Chip select -> Low
     RF24L01_CS_SetLow();
-
     //Send address
     SPI1_Exchange_Byte(RF24L01_command_R_RX_PAYLOAD);
-    status = SPI1_Exchange_Byte(0x00);
-
     //Get data
-    for (i = 0; i < length; i++) {
+    for (i = 0; i < size; i++) {
         *(data++) = SPI1_Exchange_Byte(0x00);
     }
-
     //Chip select -> High
     RF24L01_CS_SetHigh();
 
-    RF24L01_write_register(RF24L01_reg_STATUS, &status, 1);
     RF24L01_send_command(RF24L01_command_FLUSH_RX);
+
 }
 
 /**
- * Function Was Data Sent
- * @return 1 Data Sent, 2 Max_RT
+ * Function STATUS
+ * @return 1.DataSent, 2.RX_DR, 3.Max_RT 
  */
-uint8_t RF24L01_was_data_sent(void) {
-    RF24L01_reg_STATUS_content a;
-    a = RF24L01_get_status();
-
+uint8_t RF24L01_status(void) {
     uint8_t res = 0;
+    RF24L01_reg_STATUS_content status;
+    
+    status = RF24L01_get_status();
 
-    if (a.TX_DS) {
+    if (status.TX_DS) {
         res = 1;
-    } else if (a.MAX_RT) {
+    } else if (status.RX_DR) {
         res = 2;
+    } else if (status.MAX_RT) {
+        res = 3;
     }
 
     return res;
 }
 
 /**
- * Function Is Data Available
- * @return 1 Data available other case return != 1
- */
-uint8_t RF24L01_is_data_available(void) {
-    RF24L01_reg_STATUS_content a;
-    a = RF24L01_get_status();
-    return a.RX_DR;
-}
-
-/**
  * Function Clear Interrupts
  */
 void RF24L01_clear_interrupts(void) {
-    RF24L01_reg_STATUS_content a;
-    a = RF24L01_get_status();
-    RF24L01_write_register(RF24L01_reg_STATUS, (uint8_t*) & a, 1);
+    RF24L01_reg_STATUS_content status;
+    
+    RF24L01_send_command(RF24L01_command_FLUSH_TX);
+
+    *((uint8_t *) & status) = 0;
+    status.RX_DR = 1;
+    status.TX_DS = 1;
+    status.MAX_RT = 1;
+    RF24L01_write_register(RF24L01_reg_STATUS, (uint8_t*) & status, 1);
+}
+
+void ClearStatus() {
+    RF24L01_reg_STATUS_content status;
+
+    *((uint8_t *) & status) = 0;
+    status.RX_DR = 1;
+    status.TX_DS = 1;
+    status.MAX_RT = 1;
+    RF24L01_write_register(RF24L01_reg_STATUS, (uint8_t*) & status, 1);
 }

@@ -18,5 +18,5 @@ void INTERRUPT_Initialize(void) {
     IPC7bits.INT2IP = 2;
     //    ADI: ADC1 Convert Done
     //    Priority: 1
-    IPC3bits.AD1IP = 1;
+    IPC3bits.AD1IP = 4;
 }

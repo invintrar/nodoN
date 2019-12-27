@@ -5,7 +5,7 @@ void SYSTEM_Initialize(void) {
 
     pines_Conf_Init();
 
-    //SPI1_Init(FAST);
+    SPI1_Init(FAST);
 
     SPI2_Init();
 
@@ -30,12 +30,6 @@ void SYSTEM_Initialize(void) {
     RF24L01_Init();
     
     //uSDState = SD_Init();
-    
-     
-    
-
-
-     
 
 }
 

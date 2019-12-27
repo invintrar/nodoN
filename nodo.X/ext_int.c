@@ -2,6 +2,7 @@
    Section: Includes
  */
 #include "ext_int.h"
+
 /**
    Section: External Interrupt Handlers
  */
@@ -23,8 +24,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 }
 
 void __attribute__((weak)) EX_INT1_CallBack(void) {
-    fInt1 = 1;
-    ADXL355_Read_FIFO_Full();
+    bExInt1 = 1;
+    //ADXL355_Read_FIFO_Full();
 }
 
 /**
@@ -40,24 +41,11 @@ void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt(void) {
 }
 
 void __attribute__((weak)) EX_INT2_CallBack(void) {
-    uint8_t sent_info = 0;
-
-    /*Check data was sent*/
-    if ((sent_info = RF24L01_was_data_sent())) {
-        //Packet was sent or max retries reached
-        bNrf = sent_info;
-        RF24L01_clear_interrupts();
-        return;
-    }
-    /*Check data is available*/
-    if (RF24L01_is_data_available()) {
-        //Packet was received
-        mutex = 1;
-        RF24L01_clear_interrupts();
-        return;
-    }
+    //Return 1. Data Sent, 2.RX_DR 3.MAX_RT
+    bNrf = RF24L01_status();
 
     RF24L01_clear_interrupts();
+    
 }
 
 /**

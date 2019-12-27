@@ -1,9 +1,10 @@
 #ifndef RF24L01_H
 #define RF24L01_H
 
-//#include <stdint.h> //Required for the stdint typedefs
 #include <p33EP256MC202.h>
 #include "spi1.h"
+#include "ext_int.h"
+#include "main.h"
 
 
 /* Definimos Chip Select para el RF24L01*/
@@ -110,11 +111,20 @@ typedef struct _RF24L01_reg_RF_CH_content {
 } RF24L01_reg_RF_CH_content;
 
 typedef struct _RF24L01_reg_RF_SETUP_content {
-    uint8_t LNA_HCURR : 1;
+    //Don't care
+    uint8_t Obsolote : 1;
+    // Set RF output power in TX mode
     uint8_t RF_PWR : 2;
-    uint8_t RF_DR : 1;
+    //Select between the high speed data rates
+    uint8_t RF_DR_HIGH : 1;
+    //Force PLL lock signal.
     uint8_t PLL_LOCK : 1;
-    uint8_t reserved : 3;
+    // Set RF Data Rate to 250kbps.
+    uint8_t RF_DR_LOW : 1;
+    //Only '0' allowed
+    uint8_t Reserved : 1;
+    //Enable continuous carrier transmit when high
+    uint8_t CONT_WAVE : 1;
 } RF24L01_reg_RF_SETUP_content;
 
 typedef struct _RF24L01_reg_STATUS_content {
@@ -193,23 +203,20 @@ typedef struct _RF24L01_reg_FEATURE_content {
     uint8_t reserved : 4;
 } RF24L01_reg_FEATURE_content;
 
+
 /*Function Prototype*/
 
 void RF24L01_Init(void);
 
 void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel);
 
-void RF24L01_set_mode_TX(void);
+void RF24L01_sendData(uint8_t *data, uint8_t size);
 
 void RF24L01_set_mode_RX(void);
 
-uint8_t RF24L01_was_data_sent(void);
+uint8_t RF24L01_status(void);
 
-uint8_t RF24L01_is_data_available(void);
-
-void RF24L01_read_payload(uint8_t *data, uint8_t length);
-
-void RF24L01_write_payload(uint8_t *data, uint8_t length);
+void RF24L01_read_payload(uint8_t *data, uint8_t size);
 
 void RF24L01_clear_interrupts(void);
 

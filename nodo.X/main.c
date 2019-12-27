@@ -19,17 +19,12 @@ uint8_t bufferR[512];
 uint8_t rx_addr[5], tx_addr[5];
 uint8_t nrfDataRx[8], nrfDataTx[8];
 uint8_t uSDState, bWriteuSD;
-uint8_t fInt1;
-uint8_t bNrf, mutex, bInicioBloque, bAdc;
+uint8_t bExInt1, bNrf, bData, bInicioBloque, bAdc;
 ds3234_data_time rtc;
 ds3234_time rtcTime;
 uint32_t sector;
-uint16_t vADC;
+uint16_t vAdc, delay;
 uint16_t i;
-uint8_t j;
-uint8_t seconds;
-uint8_t minutes;
-uint8_t hours;
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPES
  -----------------------------------------------------------------------------*/
@@ -58,10 +53,11 @@ int main(void) {
     //ADC1_SamplingStart();
     //ADC1_SamplingStop();
 
+    //Set Mode RX
+    RF24L01_set_mode_RX();
 
     // Loop Infinite
     while (1) {
-
         /*
         if (fInt1 == 1) {
             if (bInicioBloque == 0) {
@@ -96,108 +92,97 @@ int main(void) {
             uSDState = SD_Init();
         }
          */
+        Led_verde_toggle();
+        __delay_ms(250);
+        switch (bNrf) {
+            case 1:
+                bNrf = 0;
+                RF24L01_set_mode_RX();
+                break;
+            case 2:
+                // Start measuring
+                ADC1_SamplingStart();
+                ADC1_SamplingStop();
+                
+                RF24L01_read_payload(nrfDataRx, sizeof (nrfDataRx));
+                bNrf = 0;
+                rtc.seconds = nrfDataRx[0];
+                rtc.minutes = nrfDataRx[1];
+                rtc.hours = nrfDataRx[2];
+                rtc.day = nrfDataRx[3];
+                rtc.month = nrfDataRx[4];
+                rtc.date = nrfDataRx[5];
+                rtc.year = nrfDataRx[6];
 
+                // Set Time of the RTC
+                DS3234_setTime(rtc);
 
-        //Set Mode RX
-        RF24L01_set_mode_RX();
+                /*
+                 * PREPARE THE RESPONSE
+                 */
 
-        //Wait Interruption
-        while (!mutex);
+                // Read RTC time
+                DS3234_Time(&rtcTime);
 
-        if (mutex == 1) {
-            RF24L01_read_payload(nrfDataRx, sizeof (nrfDataRx));
+                nrfDataTx[0] = 0x48;
+                nrfDataTx[1] = rtcTime.seconds;
+                nrfDataTx[2] = rtcTime.minutes;
+                nrfDataTx[3] = rtcTime.hours;
+                // Check Data ACS722
+                if (bAdc) {
+                    nrfDataTx[4] = vAdc;
+                    nrfDataTx[5] = vAdc >> 8;
+                    bAdc = 0;
+                } else {
+                    nrfDataTx[4] = 0x48;
+                    nrfDataTx[5] = 0x48;
+                }
+
+                nrfDataTx[6] = 0x48;
+                nrfDataTx[7] = 0x48;
+                RF24L01_sendData(nrfDataTx, sizeof (nrfDataTx));
+                break;
+            case 3:
+                bNrf = 3;
+                RF24L01_sendData(nrfDataTx, sizeof (nrfDataTx));
+                break;
+            default:
+                break;
         }
 
-        unsigned short delay = 0xFFF;
-        while (delay--);
 
-        // Start measuring
-        ADC1_SamplingStart();
-        ADC1_SamplingStop();
-
-
-        rtc.seconds = nrfDataRx[0];
-        rtc.minutes = nrfDataRx[1];
-        rtc.hours = nrfDataRx[2];
-        rtc.day = nrfDataRx[3];
-        rtc.month = nrfDataRx[4];
-        rtc.date = nrfDataRx[5];
-        rtc.year = nrfDataRx[6];
-
-        DS3234_setTime(rtc);
-
-        /*
-         * PREPARE THE RESPONSE
-         */
-
-        // Read RTC time
-        DS3234_Time(&rtcTime);
-
-        nrfDataTx[0] = 0x48;
-        nrfDataTx[1] = rtcTime.seconds;
-        nrfDataTx[2] = rtcTime.minutes;
-        nrfDataTx[3] = rtcTime.hours;
-        // Test data available
-        while (!bAdc) {
-            nrfDataTx[4] = vADC >> 8;
-            nrfDataTx[5] = vADC;
-            bAdc = 0;
-        }
-        nrfDataTx[6] = 0x48;
-        nrfDataTx[7] = 0x48;
-
-        
-        mutex = 0;
-
-        //Set Mode TX
-        RF24L01_set_mode_TX();
-
-        //Write Payload
-        RF24L01_write_payload(nrfDataTx, sizeof (nrfDataTx));
-
-        delay = 0xFFF;
-        while (delay--);
-
-    }
+    }// end loop
     return 0;
 }
 
 void initVariables() {
-    fInt1 = 0;
-    mutex = 0;
+    bExInt1 = 0;
+    bData = 0;
+    bNrf = 0;
     bInicioBloque = 0;
     //Sector write uSD
     sector = 35000;
     bWriteuSD = 0;
     bAdc = 0;
 
+    // Put all values of the time to cero 
+    (*(uint8_t *) & rtc) = 0x00;
+
     // Address NrF24L01 RX and TX
     for (i = 0; i < 5; i++) {
         //RX Address 
-        rx_addr[i] = 0x78;
+        rx_addr[i] = 0x0A;
         //TX Address
-        tx_addr[i] = 0x78;
+        tx_addr[i] = 0x0A;
     }
 
-    for (i = 0; i < 8; i++) {
-        nrfDataRx[i] = 0x00;
-        nrfDataTx[i] = 0x00;
+    for (i = 0; i < 32; i++) {
+        nrfDataRx[i] = 0xAA;
+        nrfDataTx[i] = 0xAA;
     }
 
     /* Initialization the variable of uSD to 0xAA*/
     for (i = 0; i < 512; i++) {
         bufferE[i] = 0x5A;
     }
-
-    //00-60 seconds
-    rtc.seconds = 0;
-    //00-60 minute
-    rtc.minutes = 12;
-    //00-24 hour
-    rtc.hours = 17;
-    //Sunday = 1, Monday = 2, ...
-    rtc.day = 5;
-    rtc.date = 12;
-    rtc.month = 12;
-    rtc.year = 19;
 }

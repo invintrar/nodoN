@@ -5,7 +5,7 @@
     Section: Includes
 */
 #include "adxl355.h"
-
+#include <p33EP256MC202.h>
 
 
 // Provide C++ Compatibility
@@ -74,8 +74,9 @@ void EX_INT2_CallBack(void);
 */
 
 extern uint8_t bNrf;
-extern uint8_t mutex;
-extern uint8_t fInt1;
+extern uint8_t bExInt1;
+extern uint8_t nrfDataRx[8];
+extern uint8_t bData;
 
 void EXT_INT_Initialize(void);
 // Provide C++ Compatibility
