@@ -43,6 +43,12 @@ void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt(void) {
 void __attribute__((weak)) EX_INT2_CallBack(void) {
     //Return 1. Data Sent, 2.RX_DR 3.MAX_RT
     bNrf = RF24L01_status();
+    
+    if(bNrf==1){
+        RF24L01_read_payload(nrfDataRx, sizeof (nrfDataRx));
+        RF24L01_clear_interrupts();
+        return;
+    }
 
     RF24L01_clear_interrupts();
     
