@@ -41,13 +41,13 @@ int main(void) {
     __delay_ms(250);
 
     //Setup  RF24L01
-    RF24L01_setup(tx_addr, rx_addr, 22);
+    //RF24L01_setup(tx_addr, rx_addr, 22);
 
     //Turn on ADXL255
     //ADXL355_Write_Byte(POWER_CTL, MEASURING);
     //__delay_ms(250);
 
-    DS3234_setTime(rtc);
+    //DS3234_setTime(rtc);
 
     // Start measuring
     //ADC1_SamplingStart();
@@ -94,7 +94,7 @@ int main(void) {
          */
         Led_verde_toggle();
         __delay_ms(250);
-
+/*
         switch (bNrf) {
             case 1:
                 bNrf = 0;
@@ -120,9 +120,9 @@ int main(void) {
                 ADC1_SamplingStop();
 
 
-                /*
-                 * PREPARE THE RESPONSE
-                 */
+                
+                // PREPARE THE RESPONSE
+                 
 
                 // Read RTC time
                 DS3234_Time(&rtcTime);
@@ -156,7 +156,7 @@ int main(void) {
             default:
                 break;
         }
-
+*/
 
     }// end loop
     return 0;
