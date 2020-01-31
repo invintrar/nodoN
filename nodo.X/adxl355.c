@@ -7,7 +7,6 @@
  VARIABLE DECLARATIONS
  -----------------------------------------------------------------------------*/
 int dataBuffer[];
-char dataCBuffer[];
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPES
  -----------------------------------------------------------------------------*/
@@ -90,7 +89,7 @@ void ADXL355_Read_FIFO_Full() {
     ADXL355_CS_SetLow();
     SPI1_Exchange_Byte((FIFO_DATA << 1) | 1);
     for (i = 0; i < 63; i++) {
-        dataCBuffer[i] = SPI1_Exchange_Byte(0x00);
+        dataAdxl[i] = SPI1_Exchange_Byte(0x00);
     }
     ADXL355_CS_SetHigh();
     __delay_us(5);

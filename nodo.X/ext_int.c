@@ -24,8 +24,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 }
 
 void __attribute__((weak)) EX_INT1_CallBack(void) {
-    bExInt1 = 1;
-    //ADXL355_Read_FIFO_Full();
+    ADXL355_Read_FIFO_Full();
 }
 
 /**
@@ -41,7 +40,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt(void) {
 }
 
 void __attribute__((weak)) EX_INT2_CallBack(void) {
-    //Return 1. Data Sent, 2.RX_DR 3.MAX_RT
+    //Return 1:Data Sent, 2:RX_DR, 3:MAX_RT
     bNrf = RF24L01_status();
     
     if(bNrf==1){

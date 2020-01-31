@@ -76,7 +76,6 @@ void EX_INT2_CallBack(void);
 extern uint8_t bNrf;
 extern uint8_t bExInt1;
 extern uint8_t nrfDataRx[8];
-extern uint8_t bData;
 
 void EXT_INT_Initialize(void);
 // Provide C++ Compatibility

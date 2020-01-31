@@ -78,7 +78,7 @@ void RF24L01_write_register(uint8_t register_addr, uint8_t *value, uint8_t lengt
  * @param Channel
  */
 void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel) {
-    RF24L01_powerDown();
+    RF24L01_CE_SetLow();
 
     //Enable Auto Acknowledgment (0x01)
     RF24L01_reg_EN_AA_content EN_AA;
@@ -135,8 +135,8 @@ void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel) {
     //RX payload in data pipe0(0x11)
     RF24L01_reg_RX_PW_P0_content RX_PW_P0;
     *((uint8_t *) & RX_PW_P0) = 0;
-    //Number of bytes in RX payload in data Pipe0 (8 bytes)
-    RX_PW_P0.RX_PW_P0 = 0x08;
+    //Number of bytes in RX payload in data Pipe0 (14 bytes)
+    RX_PW_P0.RX_PW_P0 = 8;
     RF24L01_write_register(RF24L01_reg_RX_PW_P0, ((uint8_t *) & RX_PW_P0), 1);
     
     RF24L01_reg_STATUS_content status;  
@@ -154,7 +154,7 @@ void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel) {
     *((uint8_t *) & config) = 0;
     //Power Up
     config.PWR_UP = 1;
-    //PRX
+    // RX/TX 1:PRX, 0:PTX
     config.PRIM_RX = 1;
     //CRC(Cyclic Redundancy Check) encoding scheme '0'-1 byte or '1'-2 bytes
     config.CRCO = 1;
@@ -176,13 +176,6 @@ void RF24L01_sendData(uint8_t *data, uint8_t size) {
     uint8_t i;
     //CE -> Low
     RF24L01_CE_SetLow();
-    
-    __delay_us(200);
-    
-    i=0;
-    i=1;
-    
-    RF24L01_clear_interrupts();
   
     //Chip select -> Low 
     RF24L01_CS_SetLow();
@@ -211,7 +204,7 @@ void RF24L01_sendData(uint8_t *data, uint8_t size) {
     //Generates an impulsion for CE to send the data
     RF24L01_CE_SetHigh(); //CE -> High
     //Delay 10uS
-    __delay_us(10);
+    __delay_us(12);
     RF24L01_CE_SetLow(); //CE -> Low
 
 }
@@ -247,16 +240,8 @@ void RF24L01_set_mode_RX(void) {
  */
 RF24L01_reg_STATUS_content RF24L01_get_status(void) {
     uint8_t status;
-
-    //Chip select -> Low
-    RF24L01_CS_SetLow();
-
-    //Send address and command
-    SPI1_Exchange_Byte(RF24L01_reg_STATUS);
-    status = SPI1_Exchange_Byte(0x00);
-
-    //Chip select -> High
-    RF24L01_CS_SetHigh();
+        
+    status = RF24L01_read_register(RF24L01_reg_STATUS);
 
     return *((RF24L01_reg_STATUS_content *) & status);
 }
@@ -288,7 +273,7 @@ void RF24L01_read_payload(uint8_t *data, uint8_t size) {
 
 /**
  * Function STATUS
- * @return 1.DataSent, 2.RX_DR, 3.Max_RT 
+ * @return 1:DataSent, 2:RX_DR, 3:Max_RT 
  */
 uint8_t RF24L01_status(void) {
     uint8_t res = 0;

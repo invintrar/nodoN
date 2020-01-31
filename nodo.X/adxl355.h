@@ -130,7 +130,7 @@
  VARIABLE DECLARATIONS
  -----------------------------------------------------------------------------*/
 extern int dataBuffer[3];
-extern char dataCBuffer[63];
+extern uint8_t dataAdxl[63];
 
 /*----------------------------------------------------------------------------
  FUNCTION PROTOTYPES

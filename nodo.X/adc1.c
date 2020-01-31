@@ -75,7 +75,6 @@ void ADC1_Initialize(void) {
 }
 
 void __attribute__((weak)) ADC1_CallBack(void) {
-    bAdc = 1;
     vAdc = ADC1BUF0;
 }
 

@@ -58,8 +58,6 @@ typedef struct{
 
 #define int_to_bcd(X) ((X) - ((X)/10)*10) | (((X) / 10) << 4)
 
-//Define Port to Use
-#define SQW_OUT PORTAbits.RA2
 //Define chip select DS3234
 #define DS3234_ChepSelect PORTBbits.RB6
 
