@@ -6,34 +6,40 @@
 /* DS3234 Variables */
 
 /*****************************************************************************/
-// Variable of time and date
+
 typedef struct {
-    //00-59
+    //Seconds(00-59)
     uint8_t seconds;
-    //00-59
+    //Minutes(00-59)
     uint8_t minutes;
-    //00-23
+    //Hours(00-23)
     uint8_t hours;
-    //00-07
+    //Day of week(01-07)(Sunday-Saturday) 
     uint8_t day;
-    //00-31
+    //Day of the month(01-31)
     uint8_t date;
-    //01-12
+    //Month(01-12)
     uint8_t month;
-    //00-99
+    //Year (0-99)
     uint8_t year;
-} ds3234_data_time;
+} ds3234_data_time;/*
+                    * Variable Time(Seconds, Minutes, 
+                    * Hours, Day of week,
+                    * Day of Month,
+                    * Month, Year
+                    */
 
 typedef struct{
-    //00-59
+    //Seconds(00-59)
     uint8_t seconds;
-    //00-59
+    //Minutes(00-59)
     uint8_t minutes;
-    //00-23
+    //Hours(00-23)
     uint8_t hours;
-}ds3234_time;
+}ds3234_time;/**
+              * Variable for time (Seconds,Minutes, Hours)
+              */
 
-/*Variables with field of bits structure*/
 typedef struct{
     // Alarm 1 Interrupt Enable
     uint8_t A1IE : 1;
@@ -51,7 +57,7 @@ typedef struct{
     uint8_t BBSQW : 1;
     // Enable Oscillator
     uint8_t EOSCC : 1;
-} ds3234_control_register;
+} ds3234_control_register;/*Variables with field of bits structure*/
 
 
 #define bcd_to_int(X)  (10*((X) >> 4)) + ((X) & 0x0F)
@@ -73,6 +79,7 @@ typedef struct{
 /*****************************************************************************/
 /* DS3234 Function Prototyping */
 /*****************************************************************************/
+
 void DS3234_Init(void);
 
 void DS3234_readTime(ds3234_data_time*);
@@ -80,6 +87,5 @@ void DS3234_readTime(ds3234_data_time*);
 void DS3234_Time(ds3234_time*);
 
 void DS3234_setTime(ds3234_data_time data_time);
-
 
 #endif// End DS3234_H

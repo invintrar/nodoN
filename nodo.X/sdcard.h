@@ -11,7 +11,7 @@
  Variables Extern
  -----------------------------------------------------------------------------*/
 extern uint8_t ccs;
-extern uint8_t uSDState;
+extern uint8_t buSDState;
 
 /*---------------------------------------------------------------------------
  SD Card Chip Select I/O definition

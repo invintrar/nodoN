@@ -16,7 +16,6 @@ void __attribute__((weak)) EX_INT0_CallBack(void) {
  */
 void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
     //***User Area Begin->code: External Interrupt 0***
-
     EX_INT0_CallBack();
 
     //***User Area End->code: External Interrupt 0***
@@ -24,6 +23,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT0Interrupt(void) {
 }
 
 void __attribute__((weak)) EX_INT1_CallBack(void) {
+    bInt1 =1;
     ADXL355_Read_FIFO_Full();
 }
 

@@ -1,5 +1,5 @@
-#ifndef _TMR1_H
-#define _TMR1_H
+#ifndef _TMR4_H
+#define _TMR4_H
 
 /**
   Section: Included Files
@@ -9,21 +9,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "tmr2.h"
+
 #ifdef __cplusplus  // Provide C++ Compatibility
 
 extern "C" {
 
 #endif
 
-#define TMR1_INTERRUPT_TICKER_FACTOR    1
-
-
+#define TMR4_INTERRUPT_TICKER_FACTOR    1
     /**
-     * Section: Extern Variables
+     * Extern Variable
      */
-    extern uint16_t timeMcs;
-    extern uint16_t timeMls;
-
+    extern uint8_t timeMin;
+    extern uint8_t timeSec;
+    extern uint8_t timeHor;
     /**
       Section: Interface Routines
      */
@@ -51,117 +51,140 @@ extern "C" {
 
         period = 0x20;
 
-        TMR1_Initialize();
+        TMR4_Initialize();
 
-        TMR1_Period16BitSet(period);
+        TMR4_Period16BitSet(period);
 
-        if((value = TMR1_Period16BitGet())== period)
+        if((value = TMR4_Period16BitGet())== period)
         {
-            TMR1_Start();
+            TMR4_Start();
         }
 
         while(1)
         {
-            TMR1_Tasks();
-            if( (statusTimer1 = TMR1_GetElapsedThenClear()) == true)
+            TMR4_Tasks();
+            if( (statusTimer1 = TMR4_GetElapsedThenClear()) == true)
             {
-                TMR1_Stop();
+                TMR4_Stop();
             }
         }
         </code>
      */
-    void TMR1_Initialize(void);
-
-
-    /**
-      @Summary
-        Updates 16-bit timer value
-
-      @Description
-        This routine updates 16-bit timer value
-
-      @Param
-        None.
-
-      @Returns
-        None
- 
-      @Example 
-        Refer to the example of TMR1_Initialize();
-     */
-
-    void TMR1_Period16BitSet(uint16_t value);
-
-    /**
-
-      @Summary
-        Provides the timer 16-bit period value
-
-      @Description
-        This routine provides the timer 16-bit period value
-
-      @Param
-        None.
-
-      @Returns
-        Timer 16-bit period value
- 
-      @Example 
-        Refer to the example of TMR1_Initialize();
-     */
-
-    uint16_t TMR1_Period16BitGet(void);
+    void TMR4_Initialize(void);
 
     /**
       @Summary
-        Updates the timer's 16-bit value
+        Updates 32-bit timer value
 
       @Description
-        This routine updates the timer's 16-bit value
+        This routine updates 32-bit timer value
 
       @Param
-        None.
+        value       - 32-bit period value
 
       @Returns
         None
 
       @Example 
         <code>
-        uint16_t value=0xF0F0;
+        bool statusTimer1;
+        uint32_t period;
+        uint32_t value;
 
-        TMR1_Counter16BitSet(value));
+        period = 0x20202020;
+
+        TMR4_Initialize();
+
+        TMR4_Period32BitSet(period);
+
+        if((value = TMR4_Period32BitGet())== period)
+        {
+            TMR4_Start();
+        }
 
         while(1)
         {
-            TMR1_Tasks();
-            if( (value == TMR1_Counter16BitGet()))
+            TMR4_Tasks();
+            if( (statusTimer1 = TMR4_IsElapsed()) == true)
             {
-                TMR1_Stop();
+                TMR4_Stop();
             }
         }
         </code>
      */
 
-    void TMR1_Counter16BitSet(uint16_t value);
+    void TMR4_Period32BitSet(uint32_t value);
 
     /**
       @Summary
-        Provides 16-bit current counter value
+        Provides the timer 32-bit period value
 
       @Description
-        This routine provides 16-bit current counter value
+        This routine provides the timer 32-bit period value
 
       @Param
-        None.
+        None
 
       @Returns
-        16-bit current counter value
+        Timer 32-bit period value
  
       @Example 
-        Refer to the example of TMR1_Counter16BitSet();
+        Refer to the example of TMR4_Period32BitSet();
      */
 
-    uint16_t TMR1_Counter16BitGet(void);
+    uint32_t TMR4_Period32BitGet(void);
+
+    /**
+      @Summary
+        Updates the timer's 32-bit value
+
+      @Description
+        This routine updates the timer's 32-bit value
+
+      @Param
+        value       - 32-bit Counter value
+
+      @Returns
+        None
+	
+      @Example 
+        <code>
+        uint32_t value=0xF0F0F0;
+
+        TMR4_Counter32BitSet(value));
+
+        while(1)
+        {
+            TMR4_Tasks();
+            if( (value == TMR4_Counter32BitGet()))
+            {
+                TMR4_Stop();
+            }
+        }
+        </code>
+     */
+
+    void TMR4_Counter32BitSet(uint32_t value);
+
+    /**
+      @Summary
+        Provides 32-bit  current counter value
+
+      @Description
+        This routine provides 32-bit current counter value
+
+      @Param
+        None
+
+      @Returns
+        32-bit current counter value
+ 
+      @Example 
+        Refer to the example of TMR4_Counter32BitSet();
+     */
+
+    uint32_t TMR4_Counter32BitGet(void);
+
 
     /**
       @Summary
@@ -178,11 +201,11 @@ extern "C" {
  
       @Example 
         <code>
-            TMR1_SetInterruptHandler(&TMR1_CallBack);
+            TMR4_SetInterruptHandler(&TMR4_CallBack);
         </code>
      */
 
-    void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
+    void TMR4_SetInterruptHandler(void (* InterruptHandler)(void));
 
     /**
       @Summary
@@ -198,10 +221,10 @@ extern "C" {
         None
  
       @Example 
-        Refer to the example of TMR1_Initialize();
+        Refer to the example of TMR4_Initialize();
      */
 
-    void TMR1_Start(void);
+    void TMR4_Start(void);
 
     /**
       @Summary
@@ -217,10 +240,10 @@ extern "C" {
         None
  
       @Example 
-        Refer to the example of TMR1_Initialize();
+        Refer to the example of TMR4_Initialize();
      */
 
-    void TMR1_Stop(void);
+    void TMR4_Stop(void);
 
     /**
       @Summary
@@ -238,10 +261,10 @@ extern "C" {
         False - Timer has not elapsed.
  
       @Example 
-        Refer to the example of TMR1_Initialize();
+        Refer to the example of TMR4_Initialize();
      */
 
-    bool TMR1_GetElapsedThenClear(void);
+    bool TMR4_GetElapsedThenClear(void);
 
     /**
       @Summary
@@ -257,10 +280,10 @@ extern "C" {
         Software counter value.
  
       @Example 
-        Refer to the example of TMR1_Initialize();
+        Refer to the example of TMR4_Initialize();
      */
 
-    int TMR1_SoftwareCounterGet(void);
+    int TMR4_SoftwareCounterGet(void);
 
     /**
       @Summary
@@ -276,10 +299,10 @@ extern "C" {
         None
  
       @Example 
-        Refer to the example of TMR1_Initialize();
+        Refer to the example of TMR4_Initialize();
      */
 
-    void TMR1_SoftwareCounterClear(void);
+    void TMR4_SoftwareCounterClear(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -287,7 +310,7 @@ extern "C" {
 
 #endif
 
-#endif //_TMR1_H
+#endif //_TMR4_H
 
 /**
  End of File
